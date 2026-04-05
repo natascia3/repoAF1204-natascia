@@ -70,8 +70,9 @@ def _(mo, years, continents):
         label="Select continent",
     )
 
-    mo.vstack([year, continent])
-    return continent, year
+    controls = mo.vstack([year, continent])
+    controls
+    return continent, controls, year
 
 
 @app.cell
@@ -96,7 +97,7 @@ def _(mo, year, continent):
 
 
 @app.cell
-def _(filtered, px):
+def _(filtered, px, mo):
     fig_scatter = px.scatter(
         filtered,
         x="gdpPercap",
@@ -107,12 +108,12 @@ def _(filtered, px):
         title="Scatter Plot: GDP per Capita vs Life Expectancy",
         log_x=True,
     )
-    fig_scatter
+    mo.ui.plotly(fig_scatter)
     return
 
 
 @app.cell
-def _(filtered, px):
+def _(filtered, px, mo):
     fig_hist = px.histogram(
         filtered,
         x="lifeExp",
@@ -120,12 +121,12 @@ def _(filtered, px):
         nbins=20,
         title="Histogram: Distribution of Life Expectancy",
     )
-    fig_hist
+    mo.ui.plotly(fig_hist)
     return
 
 
 @app.cell
-def _(filtered, px):
+def _(filtered, px, mo):
     top10 = filtered.sort_values("pop", ascending=False).head(10)
 
     fig_bar = px.bar(
@@ -135,12 +136,12 @@ def _(filtered, px):
         color="continent",
         title="Bar Chart: Top 10 Countries by Population",
     )
-    fig_bar
+    mo.ui.plotly(fig_bar)
     return
 
 
 @app.cell
-def _(df, continent, px):
+def _(df, continent, px, mo):
     if continent.value == "All":
         avg = df.groupby(["year", "continent"], as_index=False)["lifeExp"].mean()
         fig_line = px.line(
@@ -160,12 +161,12 @@ def _(df, continent, px):
             title=f"Line Chart: Average Life Expectancy Over Time in {continent.value}",
         )
 
-    fig_line
+    mo.ui.plotly(fig_line)
     return
 
 
 @app.cell
-def _(filtered, px):
+def _(filtered, px, mo):
     pie = filtered.groupby("continent", as_index=False)["pop"].sum()
 
     fig_pie = px.pie(
@@ -174,12 +175,12 @@ def _(filtered, px):
         values="pop",
         title="Pie Chart: Population Share by Continent",
     )
-    fig_pie
+    mo.ui.plotly(fig_pie)
     return
 
 
 @app.cell
-def _(filtered, px):
+def _(filtered, px, mo):
     fig_density = px.density_contour(
         filtered,
         x="gdpPercap",
@@ -187,12 +188,12 @@ def _(filtered, px):
         color="continent",
         title="Density Plot: GDP per Capita and Life Expectancy",
     )
-    fig_density
+    mo.ui.plotly(fig_density)
     return
 
 
 @app.cell
-def _(filtered, px):
+def _(filtered, px, mo):
     fig_box = px.box(
         filtered,
         x="continent",
@@ -200,7 +201,7 @@ def _(filtered, px):
         color="continent",
         title="Box Plot: Life Expectancy by Continent",
     )
-    fig_box
+    mo.ui.plotly(fig_box)
     return
 
 
@@ -241,49 +242,49 @@ def _(stocks, stock):
 
 
 @app.cell
-def _(finance_df, stock, px):
+def _(finance_df, stock, px, mo):
     fig_fin_line = px.line(
         finance_df,
         x="date",
         y="price",
         title=f"Finance Line Chart: {stock.value} Price Over Time",
     )
-    fig_fin_line
+    mo.ui.plotly(fig_fin_line)
     return
 
 
 @app.cell
-def _(finance_df, stock, px):
+def _(finance_df, stock, px, mo):
     fig_fin_scatter = px.scatter(
         finance_df,
         x="date",
         y="price",
         title=f"Finance Scatter Plot: {stock.value} Price Over Time",
     )
-    fig_fin_scatter
+    mo.ui.plotly(fig_fin_scatter)
     return
 
 
 @app.cell
-def _(finance_df, stock, px):
+def _(finance_df, stock, px, mo):
     fig_fin_hist = px.histogram(
         finance_df,
         x="return",
         nbins=30,
         title=f"Finance Histogram: {stock.value} Returns",
     )
-    fig_fin_hist
+    mo.ui.plotly(fig_fin_hist)
     return
 
 
 @app.cell
-def _(finance_df, stock, px):
+def _(finance_df, stock, px, mo):
     fig_fin_box = px.box(
         finance_df,
         y="return",
         title=f"Finance Box Plot: {stock.value} Returns",
     )
-    fig_fin_box
+    mo.ui.plotly(fig_fin_box)
     return
 
 
