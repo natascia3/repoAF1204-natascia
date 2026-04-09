@@ -9,7 +9,6 @@ def _():
     import marimo as mo
     import pandas as pd
     import plotly.express as px
-
     return mo, pd, px
 
 
@@ -18,22 +17,23 @@ def _(pd):
     csv_url = "https://gist.githubusercontent.com/DrAYim/80393243abdbb4bfe3b45fef58e8d3c8/raw/ed5cfd9f210bf80cb59a5f420bf8f2b88a9c2dcd/sp500_ZScore_AvgCostofDebt.csv"
 
     df = pd.read_csv(csv_url)
-    df = df.dropna(subset=['AvgCost_of_Debt', 'Z_Score_lag', 'Sector_Key'])
-    df = df[df['AvgCost_of_Debt'] < 5]
+    df = df.dropna(subset=["AvgCost_of_Debt", "Z_Score_lag", "Sector_Key"])
+    df = df[df["AvgCost_of_Debt"] < 5]
 
-    df['Debt_Cost_Percent'] = df['AvgCost_of_Debt'] * 100
-    df['Market_Cap_B'] = df['Market_Cap'] / 1e9
-    return (df,)
+    df["Debt_Cost_Percent"] = df["AvgCost_of_Debt"] * 100
+    df["Market_Cap_B"] = df["Market_Cap"] / 1e9
+
+    return df
 
 
 @app.cell
 def _(df, mo):
-    sectors = sorted(df['Sector_Key'].unique().tolist())
+    sectors = sorted(df["Sector_Key"].unique().tolist())
 
     sector_dropdown = mo.ui.multiselect(
         options=sectors,
         value=sectors[:3],
-        label="Filter by Sector"
+        label="Filter by Sector",
     )
 
     cap_slider = mo.ui.slider(
@@ -41,91 +41,96 @@ def _(df, mo):
         stop=200,
         step=10,
         value=0,
-        label="Min Market Cap ($ Billions)"
+        label="Min Market Cap ($ Billions)",
     )
-    return cap_slider, sector_dropdown
+
+    return sector_dropdown, cap_slider
 
 
 @app.cell
-def _(cap_slider, df, sector_dropdown):
+def _(df, sector_dropdown, cap_slider):
     filtered = df[
-        (df['Sector_Key'].isin(sector_dropdown.value)) &
-        (df['Market_Cap_B'] >= cap_slider.value)
+        (df["Sector_Key"].isin(sector_dropdown.value)) &
+        (df["Market_Cap_B"] >= cap_slider.value)
     ]
-    return (filtered,)
+
+    return filtered
 
 
 @app.cell
 def _(filtered, mo, px):
     fig = px.scatter(
         filtered,
-        x='Z_Score_lag',
-        y='Debt_Cost_Percent',
-        color='Sector_Key',
-        size='Market_Cap_B',
-        hover_name='Name',
+        x="Z_Score_lag",
+        y="Debt_Cost_Percent",
+        color="Sector_Key",
+        size="Market_Cap_B",
+        hover_name="Name",
         title="Cost of Debt vs Credit Risk",
-        template='presentation'
+        template="presentation",
     )
 
     chart = mo.ui.plotly(fig)
-    return (chart,)
+
+    return chart
 
 
 @app.cell
 def _(mo):
     tab_cv = mo.md("""
-    ### Natascia Hossain  
-    **Aspiring Financial Analyst | Data & AI Enthusiast**
+### Natascia Hossain  
+**Aspiring Financial Analyst | Data & AI Enthusiast**
 
-    ---
+---
 
-    ### Summary
-    - Finance student at Bayes Business School with strong interest in financial data analysis.
-    - Skilled in Python, marimo, and Plotly for building interactive dashboards.
-    - Passionate about using data to support financial decision-making.
+### Summary
+- Finance student at Bayes Business School  
+- Skilled in Python, marimo, Plotly  
+- Interested in financial data analysis  
 
-    ---
+---
 
-    ### Education
-    - BSc Accounting & Finance, Bayes Business School (2025 - Present)
+### Education
+- BSc Accounting & Finance (2025–Present)
 
-    ---
+---
 
-    ### Skills
-    - Python (Data Analysis & Visualisation)
-    - Data Visualisation (Plotly, marimo)
-    - Financial Analysis
-    - Dashboard Development
-    """)
-    return (tab_cv,)
+### Skills
+- Python (Data Analysis)
+- Data Visualisation
+- Financial Analysis
+""")
+
+    return tab_cv
 
 
 @app.cell
-def _(cap_slider, chart, mo, sector_dropdown):
+def _(mo, chart, sector_dropdown, cap_slider):
     tab_project = mo.vstack([
         mo.md("## 📊 Financial Dashboard"),
         mo.callout(mo.md("Explore how credit risk affects borrowing cost"), kind="info"),
         mo.hstack([sector_dropdown, cap_slider]),
         chart
     ])
-    return (tab_project,)
+
+    return tab_project
 
 
 @app.cell
 def _(mo):
     tab_personal = mo.md("""
-    ## 🌍 Personal Interests
+## 🌍 Personal Interests
 
-    - Travelling and exploring new cultures  
-    - Photography  
-    - Learning about global markets  
-    """)
-    return (tab_personal,)
+- Travelling  
+- Photography  
+- Learning about global markets  
+""")
+
+    return tab_personal
 
 
 @app.cell
-def _(mo, tab_cv, tab_personal, tab_project):
+def _(mo, tab_cv, tab_project, tab_personal):
     tabs = mo.ui.tabs({
         "📄 About Me": tab_cv,
         "📊 Projects": tab_project,
@@ -133,10 +138,11 @@ def _(mo, tab_cv, tab_personal, tab_project):
     })
 
     mo.md(f"""
-    # Portfolio Website
-    ---
-    {tabs}
-    """)
+# Portfolio Website
+---
+{tabs}
+""")
+
     return
 
 
