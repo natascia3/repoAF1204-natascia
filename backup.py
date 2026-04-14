@@ -24,7 +24,7 @@ def _():
 
 @app.cell
 def _(pd):
-    df = pd.read_csv("assets/sp500_ZScore_AvgCostofDebt.csv")
+    df = pd.read_csv("public/sp500_ZScore_AvgCostofDebt.csv")
     df = df.dropna(subset=["AvgCost_of_Debt", "Z_Score_lag", "Sector_Key", "Market_Cap"])
     df = df[df["AvgCost_of_Debt"] < 0.15].copy()
 
