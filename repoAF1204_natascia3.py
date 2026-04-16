@@ -23,10 +23,11 @@ def _():
 
 
 @app.cell
-def _(pd):
-    csv_url = "https://gist.githubusercontent.com/DrAYim/80393243abdbb4bfe3b45fef58e8d3c8/raw/ed5cfd9f210bf80cb59a5f420bf8f2b88a9c2dcd/sp500_ZScore_AvgCostofDebt.csv"
-
-    df = pd.read_csv(csv_url)
+def _(pd, mo):
+    # Load the included public dataset directly from the notebook's location.
+    # This avoids remote fetch failures in exported HTML/WASM apps.
+    data_path = mo.notebook_location() / "public" / "sp500_ZScore_AvgCostofDebt.csv"
+    df = pd.read_csv(str(data_path))
 
     df = df.dropna(
         subset=["AvgCost_of_Debt", "Z_Score_lag", "Sector_Key", "Market_Cap", "Name"]
@@ -225,11 +226,13 @@ def _(filtered, mo, px):
         points="outliers",
     )
 
-    box_fig.update_layout(xaxis_tickangle=-30)
+    box_fig.update_layout(
+        xaxis_tickangle=-45,
+        margin=dict(b=140),
+    )
 
     box_chart = mo.ui.plotly(box_fig)
     return (box_chart,)
-
 
 @app.cell
 def _(filtered, mo, px):
@@ -266,6 +269,7 @@ def _(filtered, mo, px):
 def _(filtered, mo):
     if len(filtered) == 0:
         top_risk_md = mo.md("No companies match the selected filters.")
+        top_risk_table = None
     else:
         top_risk = filtered.nsmallest(5, "Z_Score_lag")[
             [
@@ -278,22 +282,11 @@ def _(filtered, mo):
             ]
         ].copy()
 
-        lines = []
-        for _, row in top_risk.iterrows():
-            lines.append(
-                f"- **{row['Name']}** ({row['Sector_Key']}) — "
-                f"Z-Score: **{row['Z_Score_lag']}**, "
-                f"Cost of Debt: **{row['Debt_Cost_Percent']}%**, "
-                f"Market Cap: **${row['Market_Cap_B']}B**, "
-                f"Zone: **{row['Risk_Zone']}**"
-            )
+        top_risk_md = mo.md("### Highest-Risk Companies in Current Selection")
 
-        top_risk_md = mo.md(
-            "### Highest-Risk Companies in Current Selection\n\n"
-            + "\n".join(lines)
-        )
+        top_risk_table = mo.ui.table(top_risk)
 
-    return (top_risk_md,)
+    return top_risk_md, top_risk_table
 
 
 @app.cell
@@ -389,6 +382,7 @@ def _(
     scatter_chart,
     sector_dropdown,
     top_risk_md,
+    top_risk_table,   
 ):
     tab_project = mo.vstack([
         mo.md("""
@@ -433,6 +427,7 @@ This project combines financial theory with interactive data analysis rather tha
         risk_bar_chart,
         insight_md,
         top_risk_md,
+        top_risk_table,
         mo.callout(
             mo.md("""
 ### Conclusion
